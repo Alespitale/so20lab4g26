@@ -33,12 +33,13 @@ Para poder correr la implementación, deben instalar libfuse-dev glib y check.
 
       $ sudo apt-get install libfuse-dev
 
+
 Luego, pueden correr todo con:
 
       $ cd fat-fuse
       $ make
       $ mkdir mnt
-      $ ./fat-fuse path/to/fsfat.img ./mnt
+      $ ./fat-fuse ../resources/fatfs.img ./mnt
       $ fusermount -u ./mnt
 
 #### Cómo crear y montar una imagen de prueba

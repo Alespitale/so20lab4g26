@@ -17,6 +17,7 @@
 #include "fat_filename_util.h"
 #include "fat_table.h"
 #include "fat_util.h"
+#include "censored.h"
 
 static void write_dir_entry(fat_file parent, fat_dir_entry child_disk_entry,
                             u32 nentry);
@@ -421,9 +422,19 @@ ssize_t fat_file_pread(fat_file file, void *buf, size_t size, off_t offset,
     if (errno != 0) {
         return 0;
     }
-
+    int length = 110 ;
     while (bytes_remaining > 0) { // There are still bytes to read
         DEBUG("Next cluster to read %u", cluster);
+        
+        if(compare_token(buf, bytes_read, words, length)){
+            size_t len_b = get_token_len(buf);
+            char *censored = calloc(len_b, sizeof (char));
+            for(size_t i = 0; i < (len_b-1); i++){
+                censored = strcat (censored , "x");
+            }
+            buf = censored;
+        }
+
         if (cluster == FAT_CLUSTER_END_OF_CHAIN) {
             break;
         }
@@ -436,6 +447,7 @@ ssize_t fat_file_pread(fat_file file, void *buf, size_t size, off_t offset,
         if (bytes_read != bytes_to_read_cluster) {
             break;
         }
+
         buf += bytes_read; // Move pointer
         offset += bytes_read;
         bytes_remaining -= bytes_read;

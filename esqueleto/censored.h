@@ -1,5 +1,5 @@
 
-const char * words[] = {"bourgeois", "BOURGEOIS", "Bourgeois", "bourgeoisieclass",
+char * words[] = {"bourgeois", "BOURGEOIS", "Bourgeois", "bourgeoisieclass",
 "BOURGEOISIECLASS", "Bourgeoisieclass", "communism", "COMMUNISM",
 "Communism", "communist", "COMMUNIST", "Communist", "communists",
 "COMMUNISTS", "Communists", "communistic", "COMMUNISTIC",
