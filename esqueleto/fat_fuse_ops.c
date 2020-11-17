@@ -10,6 +10,7 @@
 #include "fat_fs_tree.h"
 #include "fat_util.h"
 #include "fat_volume.h"
+#include "censored.h"
 #include <alloca.h>
 #include <errno.h>
 #include <gmodule.h>
@@ -18,6 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+
+
 
 static int fat_fuse_mknod(const char *path, mode_t mode, dev_t dev);
 
@@ -171,7 +174,26 @@ static int fat_fuse_read(const char *path, char *buf, size_t size, off_t offset,
     if (errno != 0) {
         return -errno;
     }
-
+    
+    size_t tam_token;
+    int i = 0;
+    while(i < bytes_read){
+        tam_token = get_token_len(buf);
+        if(compare_token(buf,tam_token,words,110)){
+            for(int j = 0 ; j < tam_token ; j++){
+                buf[j] = 'X';
+            }
+        }
+        //&buf[length_token]
+        if(tam_token == 0){
+            i +=1;    
+            buf+=1;   
+        }else{
+            i += tam_token;
+            buf+= tam_token;
+        }
+    }
+    
     return bytes_read;
 }
 
