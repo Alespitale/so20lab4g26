@@ -517,18 +517,17 @@ ssize_t fat_file_pwrite(fat_file file, const void *buf, size_t size,
         bytes_written_cluster = full_pwrite(
             file->table->fd, buf, bytes_to_write_cluster, cluster_off);
         bytes_remaining -= bytes_written_cluster;
-        if (bytes_written_cluster != bytes_to_write_cluster) {
-            break;
-        }
-        buf += bytes_written_cluster; // Move pointer
+                buf += bytes_written_cluster; // Move pointer
         offset += bytes_written_cluster;
-
         if (bytes_remaining > 0) {
             cluster = fat_table_get_next_cluster(file->table, cluster);
             if (errno != 0) {
-                break;
+               fat_table_set_next_cluster(fat->table,cluster, fat_table_get_next_free_cluster(fat->table));
+               cluster = fat_table_get_next_cluster(file->table, cluster);
             }
         }
+
+        
     }
 
     // Update new file size
