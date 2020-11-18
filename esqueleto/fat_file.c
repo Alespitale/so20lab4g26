@@ -490,8 +490,67 @@ void fat_file_truncate(fat_file file, off_t offset, fat_file parent) {
     fill_dentry_time_now(file->dentry, false, true);
     write_dir_entry(parent, file->dentry, file->pos_in_parent);
 }
+/*
+ ssize_t fat_file_pwrite(fat_file file, const void *buf, size_t size,
+                         off_t offset, fat_file parent) {
 
-ssize_t fat_file_pwrite(fat_file file, const void *buf, size_t size,
+     u32 cluster = 0;
+     ssize_t bytes_written_cluster = 0, bytes_remaining = size;
+     ssize_t bytes_to_write_cluster = 0;
+     off_t original_offset = offset, cluster_off = 0;
+
+
+     if (offset > file->dentry->file_size) {
+         errno = EOVERFLOW;
+         return 0;
+     }
+
+     // Move cluster to first cluster to write
+     cluster = fat_table_seek_cluster(file->table, file->start_cluster, offset);
+     if (errno != 0) {
+         return 0;
+     }
+
+     while (bytes_remaining > 0 && !fat_table_is_EOC(file->table, cluster)) {
+         DEBUG("Next cluster to write %u", cluster);
+         bytes_to_write_cluster = fat_table_get_cluster_remaining_bytes(
+             file->table, bytes_remaining, offset);
+         cluster_off = fat_table_cluster_offset(file->table, cluster) +
+                       fat_table_mask_offset(offset, file->table);
+         bytes_written_cluster = full_pwrite(
+             file->table->fd, buf, bytes_to_write_cluster, cluster_off);
+         bytes_remaining -= bytes_written_cluster;
+         if (bytes_written_cluster != bytes_to_write_cluster) {
+             break;
+         }
+
+         buf += bytes_written_cluster; // Move pointer
+         offset += bytes_written_cluster;
+ 
+         if (bytes_remaining > 0) {
+             cluster = fat_table_get_next_cluster(file->table, cluster);
+             if (errno != 0) {
+                 break;
+             }
+         }
+     }
+
+     // Update new file size
+     if (original_offset + size - bytes_remaining > file->dentry->file_size) {
+         file->dentry->file_size = offset + size - bytes_remaining;
+     }
+
+     // TODO if this operation fails, then the FAT table and the file's parent
+     // entry are left on an incosistent state. FIXME
+     // Update modified time
+
+     fill_dentry_time_now(file->dentry, false, true);
+     write_dir_entry(parent, file->dentry, file->pos_in_parent);
+ 
+     return size - bytes_remaining;
+ }*/
+
+ ssize_t fat_file_pwrite(fat_file file, const void *buf, size_t size,
                         off_t offset, fat_file parent) {
     u32 cluster = 0;
     ssize_t bytes_written_cluster = 0, bytes_remaining = size;
@@ -522,7 +581,7 @@ ssize_t fat_file_pwrite(fat_file file, const void *buf, size_t size,
         if (bytes_remaining > 0) {
             cluster = fat_table_get_next_cluster(file->table, cluster);
             if (errno != 0) {
-               fat_table_set_next_cluster(fat->table,cluster, fat_table_get_next_free_cluster(fat->table));
+               fat_table_set_next_cluster(file->table,cluster, fat_table_get_next_free_cluster(file->table));
                cluster = fat_table_get_next_cluster(file->table, cluster);
             }
         }
