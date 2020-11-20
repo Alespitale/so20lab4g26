@@ -495,6 +495,7 @@ void fat_file_truncate(fat_file file, off_t offset, fat_file parent) {
                          off_t offset, fat_file parent) {
 
      u32 cluster = 0;
+     u32 next_cluster = 0;
      ssize_t bytes_written_cluster = 0, bytes_remaining = size;
      ssize_t bytes_to_write_cluster = 0;
      off_t original_offset = offset, cluster_off = 0;
@@ -528,10 +529,11 @@ void fat_file_truncate(fat_file file, off_t offset, fat_file parent) {
          offset += bytes_written_cluster;
  
          if (bytes_remaining > 0) {
-             cluster = fat_table_get_next_cluster(file->table,cluster);
-             if(fat_table_is_EOC(file->table,cluster)){
-                cluster = fat_table_get_next_free_cluster(file->table);
-                fat_table_set_next_cluster(file->table,cluster,FAT_CLUSTER_END_OF_CHAIN);
+             if(fat_table_is_EOC(file->table,fat_table_get_next_cluster(file->table,cluster))){
+                next_cluster = fat_table_get_next_free_cluster(file->table);
+                fat_table_set_next_cluster(file->table,cluster,next_cluster);
+                fat_table_set_next_cluster(file->table,next_cluster,FAT_CLUSTER_END_OF_CHAIN);
+                cluster = fat_table_get_next_cluster(file->table,cluster);
              }
          }
      }
