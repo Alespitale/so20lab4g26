@@ -62,7 +62,7 @@ then
   echo "-------- TEST PASSED: $TEST_DESCRIPTION"
 else
   echo "-------- TEST FAILED: $TEST_DESCRIPTION not working for word COMMUNIST"
-  clean_and_exit -1
+
 fi
 
 echo "---- TEST: Writing"

@@ -22,3 +22,4 @@ char * words[] = {"bourgeois", "BOURGEOIS", "Bourgeois", "bourgeoisieclass",
 "Value", "world", "WORLD", "World", "work", "WORK", "Work",
 "working-class", "WORKING-CLASS", "Working-class", "Friedrich",
 "Engels" };
+//clean_and_exit -1
