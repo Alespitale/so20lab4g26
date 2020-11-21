@@ -94,7 +94,7 @@ void fat_table_set_next_cluster(fat_table table, u32 cur_cluster,
 u32 fat_table_seek_cluster(fat_table table, u32 start_cluster, off_t offset) {
     u32 positions_to_move = offset >> table->cluster_order;
     // Move start_cluster to first cluster to read
-    for (u32 i = 1; i < positions_to_move; ++i) {
+    for (u32 i = 1; i <= positions_to_move; ++i) {
         if (start_cluster == FAT_CLUSTER_END_OF_CHAIN) {
             DEBUG("Offset is bigger than file's last cluster.");
             errno = EOVERFLOW;

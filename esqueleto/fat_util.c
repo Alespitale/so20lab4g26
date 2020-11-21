@@ -124,10 +124,10 @@ time_t time_to_unix_time(u16 le_date, u16 le_time) {
     return mktime(&tm);
 }
 
-size_t get_token_len(char *buf) {
+size_t get_token_len(char *buf_len) {
     size_t token_size = 0;
-    while (buf[token_size] != ' ' && buf[token_size] != ',' &&
-           buf[token_size] != '.' && buf[token_size] != '\n')
+    while (buf_len[token_size] != ' ' && buf_len[token_size] != ',' &&
+           buf_len[token_size] != '.' && buf_len[token_size] != 0x0d && buf_len[token_size] != '\0')
         token_size++;
     return token_size;
 }

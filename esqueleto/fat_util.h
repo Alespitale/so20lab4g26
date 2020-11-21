@@ -66,10 +66,10 @@ int fill_time(le16 *entry_date, le16 *entry_time, const time_t t);
 time_t time_to_unix_time(u16 le_date, u16 le_time);
 
 /* Return the length of the first token delimited by ' ', ',', '.' or '/n' */
-size_t get_token_len(char *buf);
+size_t get_token_len(char *buf_len);
 
 /* Compare the first n characters of buf to each element in list. */
-bool compare_token(char *buf, size_t bytes_read, char *list[], size_t length);
+bool compare_token(char *buf, size_t token_size, char *list[], size_t length);
 
 /* Cast a member of a structure out to the containing structure
  * @ptr:    the pointer to the member.
