@@ -28,8 +28,8 @@ static int fat_fuse_mknod(const char *path, mode_t mode, dev_t dev);
 static inline fat_volume get_fat_volume() {
     return fuse_get_context()->private_data;
 }
-/*
-Use these functions to build the error logs
+
+//Use these functions to build the error logs.
 #define LOG_MESSAGE_SIZE 100
 
 static void now_to_str(char *buf) {
@@ -49,8 +49,11 @@ static void fat_fuse_log_activity(char *operation_type, fat_file file) {
     strcat(buf, "\t");
     strcat(buf, operation_type);
     strcat(buf, "\n");
+    //fat_volume vol = get_fat_volume();
+    //fat_file = fat_tree_search(vol->file_tree, strdup("fs.log"));
+    //fat_fuse_open()
 }
-*/
+
 
 /* Get file attributes (file descriptor version) */
 static int fat_fuse_fgetattr(const char *path, struct stat *stbuf,
@@ -124,8 +127,8 @@ static void fat_fuse_read_children(fat_tree_node dir_node) {
             fat_tree_insert(vol->file_tree, dir_node, (fat_file)l->data);
     }
     char *name_file = "/fs.log";
-    if(fat_tree_search(vol->file_tree, name_file)== NULL){
-        errno = fat_fuse_mknod(name_file,0,0);
+    if(fat_tree_search(vol->file_tree, name_file)== NULL){  //Si fs.log no este creado
+        errno = fat_fuse_mknod(name_file,0,0);              //Crea fs.log
     }
 }
 
@@ -157,8 +160,8 @@ static int fat_fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
     child = children;
     char *name_file = "fs.log";
     while (*child != NULL) {
-        if(strcmp((*child)->name, name_file)== 0){
-            child++;
+        if(strcmp((*child)->name, name_file)== 0){      //Oculta fs.log
+            child++;                                        
         }
         else{
             error = (*filler)(buf, (*child)->name, NULL, 0);
@@ -184,26 +187,24 @@ static int fat_fuse_read(const char *path, char *buf, size_t size, off_t offset,
     if (errno != 0) {
         return -errno;
     }
-    
+    fat_fuse_log_activity(strdup("read"),file);
     size_t tam_token;
-    int i = 0;
-    while(i < bytes_read){
-        tam_token = get_token_len(buf);
-        if(compare_token(buf,tam_token,words,110)){
-            for(int j = 0 ; j < tam_token ; j++){
-                buf[j] = 'X';
+    int bytes_already_readed = 0;
+    while(bytes_already_readed < bytes_read){       // Mientras no se hayan leido todos los bytes del archivo
+        tam_token = get_token_len(buf);             // Largo de la palabra
+        if(compare_token(buf,tam_token,words,110)){ // Compara la palabra del bufer con todas las del array words 
+            for(int j = 0 ; j < tam_token ; j++){   // Hizo un match  
+                buf[j] = 'X';                       // Censuramos la palabra con "X...X"
             }
         }
-        //&buf[length_token]
-        if(tam_token == 0){
-            i +=1;    
-            buf+=1;   
-        }else{
-            i += tam_token;
-            buf+= tam_token;
+        if(tam_token == 0){                         // La palabra del bufer no estaba en el array
+            bytes_already_readed +=1;               // Nos movemos en el while
+            buf+=1;                                 // Apuntamos el bufer una posicion adelante
+        }else{                                      // Hubo match
+            bytes_already_readed += tam_token;      // Nos movemos en el while los bytes equivalentes al tamaño de la palabra
+            buf+= tam_token;                        // Apuntamos el bufer a la posicion siguiente al tamaño de la palabra  
         }
     }
-    
     return bytes_read;
 }
 
@@ -218,7 +219,7 @@ static int fat_fuse_write(const char *path, const char *buf, size_t size,
         return 0; // Nothing to write
     if (offset > file->dentry->file_size)
         return -EOVERFLOW;
-
+    fat_fuse_log_activity(strdup("write"),file);
     printf("\t IN WRITE %s %lu %lu\n", file->filepath, size, offset);
     return fat_file_pwrite(file, buf, size, offset, parent);
 }

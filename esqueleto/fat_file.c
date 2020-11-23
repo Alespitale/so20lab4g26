@@ -528,12 +528,12 @@ ssize_t fat_file_pwrite(fat_file file, const void *buf, size_t size,
         buf += bytes_written_cluster; // Move pointer
         offset += bytes_written_cluster;
 
-        if (bytes_remaining > 0) {
-            if(fat_table_is_EOC(file->table,fat_table_get_next_cluster(file->table,cluster))){
-            next_cluster = fat_table_get_next_free_cluster(file->table);
-            fat_table_set_next_cluster(file->table,cluster,next_cluster);
-            fat_table_set_next_cluster(file->table,next_cluster,FAT_CLUSTER_END_OF_CHAIN);
-            cluster = fat_table_get_next_cluster(file->table,cluster);
+        if (bytes_remaining > 0) {                                                              // Mientras haya bytes
+            if(fat_table_is_EOC(file->table,fat_table_get_next_cluster(file->table,cluster))){  // Si no es el final de la fat table
+            next_cluster = fat_table_get_next_free_cluster(file->table);                        // Buscamos el primer cluster libre
+            fat_table_set_next_cluster(file->table,cluster,next_cluster);                       // Asignamos next_cluster como el siguiente en la entrada del cluster actual
+            fat_table_set_next_cluster(file->table,next_cluster,FAT_CLUSTER_END_OF_CHAIN);      // Asignamos EOC a next_cluster
+            cluster = fat_table_get_next_cluster(file->table,cluster);                          // Obtenemos el siguiente cluster (es decir el nuevo next_cluster)
             }
         }
     }
