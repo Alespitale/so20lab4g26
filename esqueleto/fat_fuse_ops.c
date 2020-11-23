@@ -48,10 +48,11 @@ static void fat_fuse_log_activity(char *operation_type, fat_file file) {
     strcat(buf, file->filepath);
     strcat(buf, "\t");
     strcat(buf, operation_type);
-    strcat(buf, "\n");
-    //fat_volume vol = get_fat_volume();
-    //fat_file = fat_tree_search(vol->file_tree, strdup("fs.log"));
-    //fat_fuse_open()
+    strcat(buf, "\n"); 
+    fat_volume vol = get_fat_volume();
+    fat_file log = fat_tree_search(vol->file_tree, strdup("/fs.log"));
+    fat_file parent = fat_tree_get_parent(fat_tree_node_search(vol->file_tree, strdup("/fs.log")));
+    fat_file_pwrite(log, buf, strlen(buf), log->dentry->file_size, parent);
 }
 
 
@@ -187,7 +188,6 @@ static int fat_fuse_read(const char *path, char *buf, size_t size, off_t offset,
     if (errno != 0) {
         return -errno;
     }
-    fat_fuse_log_activity(strdup("read"),file);
     size_t tam_token;
     int bytes_already_readed = 0;
     while(bytes_already_readed < bytes_read){       // Mientras no se hayan leido todos los bytes del archivo
@@ -205,6 +205,7 @@ static int fat_fuse_read(const char *path, char *buf, size_t size, off_t offset,
             buf+= tam_token;                        // Apuntamos el bufer a la posicion siguiente al tamaño de la palabra  
         }
     }
+    fat_fuse_log_activity(strdup("read") ,file);
     return bytes_read;
 }
 
@@ -219,8 +220,8 @@ static int fat_fuse_write(const char *path, const char *buf, size_t size,
         return 0; // Nothing to write
     if (offset > file->dentry->file_size)
         return -EOVERFLOW;
-    fat_fuse_log_activity(strdup("write"),file);
     printf("\t IN WRITE %s %lu %lu\n", file->filepath, size, offset);
+    fat_fuse_log_activity(strdup("write") ,file);
     return fat_file_pwrite(file, buf, size, offset, parent);
 }
 
