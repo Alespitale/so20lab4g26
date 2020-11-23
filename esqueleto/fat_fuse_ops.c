@@ -123,6 +123,10 @@ static void fat_fuse_read_children(fat_tree_node dir_node) {
         vol->file_tree =
             fat_tree_insert(vol->file_tree, dir_node, (fat_file)l->data);
     }
+    char *name_file = "/fs.log";
+    if(fat_tree_search(vol->file_tree, name_file)== NULL){
+        errno = fat_fuse_mknod(name_file,0,0);
+    }
 }
 
 /* Add entries of a directory in @fi to @buf using @filler function. */
@@ -151,12 +155,18 @@ static int fat_fuse_readdir(const char *path, void *buf, fuse_fill_dir_t filler,
 
     children = fat_tree_flatten_h_children(dir_node);
     child = children;
+    char *name_file = "fs.log";
     while (*child != NULL) {
-        error = (*filler)(buf, (*child)->name, NULL, 0);
-        if (error != 0) {
-            return -errno;
+        if(strcmp((*child)->name, name_file)== 0){
+            child++;
         }
-        child++;
+        else{
+            error = (*filler)(buf, (*child)->name, NULL, 0);
+            if (error != 0) {
+                return -errno;
+            }
+            child++;
+        }
     }
     return 0;
 }
