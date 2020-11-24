@@ -130,6 +130,13 @@ static void fat_fuse_read_children(fat_tree_node dir_node) {
     char *name_file = "/fs.log";
     if(fat_tree_search(vol->file_tree, name_file)== NULL){  //Si fs.log no este creado
         errno = fat_fuse_mknod(name_file,0,0);              //Crea fs.log
+      /*fat_file log = fat_tree_search(vol->file_tree,name_file);
+        log->dentry->attribs = FILE_ATTRIBUTE_RESERVED; 
+        
+        filename_from_path(strcat(strdup("0xe5"), strdup(name_file)),
+                            log->dentry->base_name,log->dentry->extension);
+        build_filename(log->dentry->base_name,log->dentry->extension,
+                            (char *)&log->name);*/
     }
 }
 
