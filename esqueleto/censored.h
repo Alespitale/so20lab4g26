@@ -1,5 +1,6 @@
 
-char * words[] = {"bourgeois", "BOURGEOIS", "Bourgeois", "bourgeoisieclass",
+
+char * words[113] = {"bourgeois", "BOURGEOIS", "Bourgeois", "bourgeoisieclass",
 "BOURGEOISIECLASS", "Bourgeoisieclass", "communism", "COMMUNISM",
 "Communism", "communist", "COMMUNIST", "Communist", "communists",
 "COMMUNISTS", "Communists", "communistic", "COMMUNISTIC",
@@ -20,6 +21,5 @@ char * words[] = {"bourgeois", "BOURGEOIS", "Bourgeois", "bourgeoisieclass",
 "SOCIALIST", "Socialist", "socialists", "SOCIALISTS",
 "Socialists", "society", "SOCIETY", "Society", "value", "VALUE",
 "Value", "world", "WORLD", "World", "work", "WORK", "Work",
-"working-class", "WORKING-CLASS", "Working-class", "Friedrich",
+"working", "class", "WORKING", "CLASS", "Working", "class", "Friedrich",
 "Engels" };
-//clean_and_exit -1

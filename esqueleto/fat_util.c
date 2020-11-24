@@ -1,4 +1,5 @@
 #include "fat_util.h"
+#include "letters.h"
 #include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -124,11 +125,20 @@ time_t time_to_unix_time(u16 le_date, u16 le_time) {
     return mktime(&tm);
 }
 
+static bool compare_char(char buf_letter, char letters[], int length){
+    for(int i= 0; i < length; i++){
+        if (buf_letter == letters[i]){
+            return true;
+        }
+    }
+    return false;
+}
+
 size_t get_token_len(char *buf_len) {
     size_t token_size = 0;
-    while (buf_len[token_size] != ' ' && buf_len[token_size] != ',' &&
-           buf_len[token_size] != '.' && buf_len[token_size] != 0x0d && buf_len[token_size] != '\0')
+    while (compare_char(buf_len[token_size], letters, 52)){
         token_size++;
+    }
     return token_size;
 }
 

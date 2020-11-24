@@ -49,10 +49,10 @@ static void fat_fuse_log_activity(char *operation_type, fat_file file) {
     strcat(buf, "\t");
     strcat(buf, operation_type);
     strcat(buf, "\n"); 
-    fat_volume vol = get_fat_volume();
-    fat_file log = fat_tree_search(vol->file_tree, strdup("/fs.log"));
-    fat_file parent = fat_tree_get_parent(fat_tree_node_search(vol->file_tree, strdup("/fs.log")));
-    fat_file_pwrite(log, buf, strlen(buf), log->dentry->file_size, parent);
+    fat_volume vol = get_fat_volume();                                      // Obtenemos el volumen de fat montado
+    fat_file log = fat_tree_search(vol->file_tree, strdup("/fs.log"));      // Buscamos en el arbol de directorios el archivo "fs.log"
+    fat_file parent = fat_tree_get_parent(fat_tree_node_search(vol->file_tree, strdup("/fs.log"))); // Buscamos el nodo padre de "fs.log" requerido para usar la funcion pwrite
+    fat_file_pwrite(log, buf, strlen(buf), log->dentry->file_size, parent); // Escribimos en el archivo fs.log los read o write que va almacenando el buffer 
 }
 
 
@@ -197,19 +197,26 @@ static int fat_fuse_read(const char *path, char *buf, size_t size, off_t offset,
     }
     size_t tam_token;
     int bytes_already_readed = 0;
+    
     while(bytes_already_readed < bytes_read){       // Mientras no se hayan leido todos los bytes del archivo
         tam_token = get_token_len(buf);             // Largo de la palabra
-        if(compare_token(buf,tam_token,words,110)){ // Compara la palabra del bufer con todas las del array words 
+        bool equal = false;    
+        for(int i=0; i < 113; i++){
+            if (tam_token == get_token_len(words[i])){
+                equal = true;
+            }
+        }
+        if(compare_token(buf,tam_token,words,113) && equal){ // Compara la palabra del bufer con todas las del array words 
             for(int j = 0 ; j < tam_token ; j++){   // Hizo un match  
                 buf[j] = 'X';                       // Censuramos la palabra con "X...X"
             }
-        }
+         }
         if(tam_token == 0){                         // La palabra del bufer no estaba en el array
-            bytes_already_readed +=1;               // Nos movemos en el while
-            buf+=1;                                 // Apuntamos el bufer una posicion adelante
+            bytes_already_readed += 1;              // Nos movemos en el while
+            buf += 1;                               // Apuntamos el bufer una posicion adelante
         }else{                                      // Hubo match
             bytes_already_readed += tam_token;      // Nos movemos en el while los bytes equivalentes al tamaño de la palabra
-            buf+= tam_token;                        // Apuntamos el bufer a la posicion siguiente al tamaño de la palabra  
+            buf += tam_token;                       // Apuntamos el bufer a la posicion siguiente al tamaño de la palabra  
         }
     }
     fat_fuse_log_activity(strdup("read") ,file);

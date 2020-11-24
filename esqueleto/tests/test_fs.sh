@@ -56,7 +56,7 @@ fi
 echo "---- TEST: Testing censorship"
 
 TEST_DESCRIPTION="Read file with censorship"
-counts=$(grep "MANIFESTO OF THE xxxxxxxxx PARTY" ${MOUNTING_POINT}/MANIF.TXT | wc -l)
+counts=$(grep "MANIFESTO OF THE XXXXXXXXX PARTY" ${MOUNTING_POINT}/MANIF.TXT | wc -l)
 if [ "$counts" == "1" ]
 then
   echo "-------- TEST PASSED: $TEST_DESCRIPTION"
