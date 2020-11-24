@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-
+#include <limits.h> // para user, hostname
 
 
 static int fat_fuse_mknod(const char *path, mode_t mode, dev_t dev);
@@ -42,12 +42,15 @@ static void now_to_str(char *buf) {
 
 static void fat_fuse_log_activity(char *operation_type, fat_file file) {
     // TODO Complete this function
+    char * username = getenv("USER");
     char buf[LOG_MESSAGE_SIZE] = "";
     now_to_str(buf);
     strcat(buf, "\t");
     strcat(buf, file->filepath);
     strcat(buf, "\t");
     strcat(buf, operation_type);
+    strcat(buf, "\t");
+    strcat(buf, username);
     strcat(buf, "\n"); 
     fat_volume vol = get_fat_volume();                                      // Obtenemos el volumen de fat montado
     fat_file log = fat_tree_search(vol->file_tree, strdup("/fs.log"));      // Buscamos en el arbol de directorios el archivo "fs.log"
@@ -130,13 +133,10 @@ static void fat_fuse_read_children(fat_tree_node dir_node) {
     char *name_file = "/fs.log";
     if(fat_tree_search(vol->file_tree, name_file)== NULL){  //Si fs.log no este creado
         errno = fat_fuse_mknod(name_file,0,0);              //Crea fs.log
-      /*fat_file log = fat_tree_search(vol->file_tree,name_file);
-        log->dentry->attribs = FILE_ATTRIBUTE_RESERVED; 
-        
-        filename_from_path(strcat(strdup("0xe5"), strdup(name_file)),
-                            log->dentry->base_name,log->dentry->extension);
-        build_filename(log->dentry->base_name,log->dentry->extension,
-                            (char *)&log->name);*/
+        fat_file log = fat_tree_search(vol->file_tree,name_file);
+        log->dentry->attribs = FILE_ATTRIBUTE_RESERVED;
+        memmove(log->dentry->base_name +1, log->dentry->base_name, 6);
+        log->dentry->base_name[0] = FAT_FILENAME_DELETED_CHAR;
     }
 }
 
