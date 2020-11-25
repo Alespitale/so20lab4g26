@@ -83,10 +83,10 @@ void build_filename(const u8 *src_name_p, const u8 *src_extension_p,
     unsigned extension_len;
     int max_length = 8;
     /* ####################### */
-    // if (*src_name_p == FAT_FILENAME_DELETED_CHAR) {
-    //     src_name_p++; // Deleted file, probably log file
-    //     max_length--;
-    // }
+    if (*src_name_p == FAT_FILENAME_DELETED_CHAR) {
+        src_name_p++; // Deleted file, probably log file
+        max_length--;
+    }
     /* ####################### */
     // Get the base name of the file or directory
     name_len = filename_len((char *)src_name_p, max_length);

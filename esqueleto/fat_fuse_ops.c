@@ -130,13 +130,15 @@ static void fat_fuse_read_children(fat_tree_node dir_node) {
         vol->file_tree =
             fat_tree_insert(vol->file_tree, dir_node, (fat_file)l->data);
     }
-    char *name_file = "/fs.log";
-    if(fat_tree_search(vol->file_tree, name_file)== NULL){  //Si fs.log no este creado
-        errno = fat_fuse_mknod(name_file,0,0);              //Crea fs.log
-        fat_file log = fat_tree_search(vol->file_tree,name_file);
-        log->dentry->attribs = FILE_ATTRIBUTE_RESERVED;
-        memmove(log->dentry->base_name +1, log->dentry->base_name, 6);
+    if(fat_tree_node_search(vol->file_tree, strdup("/fs.log"))== NULL){  //Si fs.log no este creado
+        DEBUG("FS no existe");
+        fat_fuse_mknod("/fs.log",0,0);                                   //Crea fs.log
+        fat_file log = fat_tree_search(vol->file_tree,strdup("/fs.log"));
+        log->dentry->attribs = FILE_ATTRIBUTE_SYSTEM;
+        memmove(log->dentry->base_name +1, log->dentry->base_name, 2);
         log->dentry->base_name[0] = FAT_FILENAME_DELETED_CHAR;
+    } else {
+        DEBUG("FS EXISTE");
     }
 }
 
