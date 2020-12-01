@@ -41,3 +41,15 @@ Finalmente usamos esta misma para registrar los accesos a lectura o escritura en
 
 ### 3.3) Ocultando el archivo de otros FS
 
+Luego de crear el archivo fs.log en fat_fuse_read_children usamos la funcion fat_tree_search para encontrar el archivo creado previamente en el arbol de directorios.
+Una vez encontrado asignamos a la dentry del el atributo FILE SYSTEM logrando que la entrada nunca sea efectivamente eliminada y marcada como libre.
+Luego utilizamos la funcion memmove para correr el base name del archivo dos bytes para ubicar en la posicion cero del basename el byte 0xe5 (definido como FAT_FILENAME_DELETED_CHAR), de esta manera, marcamos el archivo como pendiente para ser eliminado.
+Con estas caracteristicas logramos que FS ignore la entrada y asi evitamos que sea modificada de alguna manera.
+
+
+## Punto estrella 1
+
+Agregamos la libreria limits.h y luego en la funcion fuse_log_activity pedimos el username y lo concatenamos al buffer para que aparezca registrado dentro del archivo de registro fs.log 
+
+## Integrantes : Agustin Silva, Eric Negreido, Alejandro Spitale.
+## Grupo N°26 : Tres Acordes
